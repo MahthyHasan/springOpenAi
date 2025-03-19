@@ -8,6 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("api/request")
@@ -28,7 +31,7 @@ public class RequestController {
             // Check the status of the processed request and return the response accordingly
             if (processedRequest.getStatus() == Requests.Status.Completed) {
                 // Return the structured data if the request is completed
-                return ResponseEntity.ok(processedRequest.getStructuredData());
+                return ResponseEntity.ok(Map.of("data", processedRequest.getStructuredData()));
             } else {
                 // Return error message if processing failed
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -39,5 +42,11 @@ public class RequestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Unexpected Error: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<Requests>> getAllRequests() {
+        List<Requests> requests = requestServices.getAllRequests();
+        return ResponseEntity.ok(requests);
     }
 }

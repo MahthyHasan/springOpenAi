@@ -1,0 +1,48 @@
+<header>
+  <nav class="navbar">
+      <p class="title">Unstructured Data to Structured Data</p>
+  </nav>
+</header>
+
+<main class="container">
+  <div class="content">
+      <div class="input-response">
+          <div class="input-section">
+              <h1>Send the Unstructured Data</h1>
+              <input type="text" name="unStructuredData" class="data-input" [formControl]="unStructuredData" placeholder="Enter unstructured data">
+              <button class="send-button" (click)="submit()" >Send</button>
+          </div>
+          <div class="response-section">
+              <h1>Your Response</h1>
+              <h2 class="response-text">{{response}}</h2>
+          </div>
+      </div>
+  </div>
+
+  <!-- History Section with Scrollable Table -->
+  <div class="history-section">
+      <h1>Previous Conversions</h1>
+      <div class="table-container">
+          <table>
+              <thead>
+                  <tr>
+                      <th>Unstructured Data</th>
+                      <th>Created At</th>
+                      <th>Status</th>
+                      <th>Structured Data</th>
+                      <th>Updated At</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr *ngFor="let object of data">
+                      <td>{{object?.unStructuredData}}</td>
+                      <td>{{object?.createdAt}}</td>
+                      <td>{{object?.status}}</td>
+                      <td>{{object?.structuredData || ''}}</td>
+                      <td>{{object?.updatedAt}}</td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+  </div>
+</main>

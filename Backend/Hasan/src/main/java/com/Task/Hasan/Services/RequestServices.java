@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 public class RequestServices {
@@ -26,6 +27,10 @@ public class RequestServices {
         requestRepo.save(requests);
 
         openAiServices.processRequest(requests);
+    }
+
+    public List<Requests> getAllRequests() {
+        return requestRepo.findAll();
     }
 
 }
