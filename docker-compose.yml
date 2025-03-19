@@ -8,9 +8,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/yourdb
-    depends_on:
-      - mongo
+      - MONGO_URI=mongodb+srv://testuser:eqmzmbwkaM6pi9Wu@cluster0.wvqeulj.mongodb.net/baylanka?retryWrites=true&w=majority&appName=Cluster0
+      - GEMINI_API_KEY:AIzaSyAW2RJ9jreYV4CThrS57nERwHz8ZhPAHdM
     networks:
       - backend-network
 
