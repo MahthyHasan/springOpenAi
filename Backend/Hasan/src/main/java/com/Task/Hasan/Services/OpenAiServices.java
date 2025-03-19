@@ -48,7 +48,7 @@ public class OpenAiServices {
             requestRepo.save(request);
 
             // Construct OpenAI API request
-            String concatenatedText = "Change this as Structured Data give it in json only in jason don't generate any thing just provide me json structured data of this: " + request.getUnStructuredData();
+            String concatenatedText = "Instruction start here (Given an unstructured sentence, extract key information and represent it in a concise JSON format. Focus on identifying entities, actions, and relationships, and only include relevant fields in the output. Omit any null or default values. Prioritize accuracy and clarity in the extracted data.)Instruction End Here: Unstructure sentence start here ( " + request.getUnStructuredData()+")Unstructure sentence end here";
             Map<String, Object> requestBody = Map.of(
 ////                    "model", "claude-3-7-sonnet-20250219",  // Use GPT-4 or GPT-3.5-turbo
 ////                    "max_tokens", "500",
