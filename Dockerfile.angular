@@ -1,0 +1,28 @@
+# Stage 1: Build the Angular application
+FROM node:16-alpine as build
+
+# Set working directory
+WORKDIR /app/Frontend/hasan
+
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy all source files
+COPY . .
+
+# Build the Angular application
+RUN npm run build --prod
+
+# Stage 2: Serve the Angular app with Nginx
+FROM nginx:alpine
+
+# Copy the build files to the Nginx container
+COPY --from=build /app/dist/hasan /usr/share/nginx/html
+
+# Expose the default Nginx port
+EXPOSE 80
+
+# Nginx is already running in the background in this container by default

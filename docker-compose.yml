@@ -1,0 +1,36 @@
+services:
+  # Spring Boot service
+  springboot-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.springboot
+    container_name: springboot-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/yourdb
+    depends_on:
+      - mongo
+    networks:
+      - backend-network
+
+  # Angular service
+  angular-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.angular
+    container_name: angular-app
+    ports:
+      - "80:80"
+    networks:
+      - frontend-network
+
+networks:
+  backend-network:
+    driver: bridge
+  frontend-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+    driver: local

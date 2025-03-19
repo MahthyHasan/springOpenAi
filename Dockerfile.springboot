@@ -1,0 +1,15 @@
+# Use a base image with Java
+FROM openjdk:22-jdk
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the jar file into the container
+COPY target/hasan.jar app.jar  
+# Ensure "hasan.jar" exists in the target folder
+
+# Expose the port (matching application.properties)
+EXPOSE 8080
+
+# Run the jar file
+ENTRYPOINT ["java", "-jar", "app.jar"]
