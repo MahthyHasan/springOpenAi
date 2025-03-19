@@ -15,10 +15,10 @@ import java.util.Map;
 
 @Service
 public class OpenAiServices {
-    @Value("${openai.api.key}")
-    private String openAiApiKey;
-    @Value("${cloud.api.key}")
-    private String cloudeApiKey;
+//    @Value("${openai.api.key}")
+//    private String openAiApiKey;
+//    @Value("${cloud.api.key}")
+//    private String cloudeApiKey;
     @Value("${gemini.api.key}")
     private String geminiApiKey;
 
