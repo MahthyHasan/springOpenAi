@@ -25,25 +25,18 @@ public class RequestController {
     @PostMapping(value = "/sent")
     public ResponseEntity<?> registerRequest(@RequestBody Requests request) {
         try {
-            // Process the request using OpenAiServices
             Requests processedRequest = openAiServices.processRequest(request);
-
-            // Check the status of the processed request and return the response accordingly
             if (processedRequest.getStatus() == Requests.Status.Completed) {
-                // Return the structured data if the request is completed
                 return ResponseEntity.ok(Map.of("data", processedRequest.getStructuredData()));
             } else {
-                // Return error message if processing failed
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Error: " + processedRequest.getErrorMessage());
-            }
+                        .body("Error: " + processedRequest.getErrorMessage());            }
         } catch (Exception e) {
             // Handle any unexpected errors during processing
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Unexpected Error: " + e.getMessage());
         }
     }
-
     @GetMapping("/all")
     public ResponseEntity<List<Requests>> getAllRequests() {
         List<Requests> requests = requestServices.getAllRequests();

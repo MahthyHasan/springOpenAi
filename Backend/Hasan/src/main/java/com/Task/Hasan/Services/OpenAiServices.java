@@ -46,11 +46,10 @@ public class OpenAiServices {
             request.setStatus(Requests.Status.Processing);
             request.setUpdatedAt(Instant.now());
             requestRepo.save(request);
-
             // Construct OpenAI API request
             String concatenatedText = "Instruction start here (Given an unstructured sentence, extract key information and represent it in a concise JSON format. Focus on identifying entities, actions, and relationships, and only include relevant fields in the output. Omit any null or default values. Prioritize accuracy and clarity in the extracted data.)Instruction End Here: Unstructure sentence start here ( " + request.getUnStructuredData()+")Unstructure sentence end here";
             Map<String, Object> requestBody = Map.of(
-////                    "model", "claude-3-7-sonnet-20250219",  // Use GPT-4 or GPT-3.5-turbo
+////                    "model", "claude-3-7-sonnet-20250219",  //  GPT-3.5-turbo
 ////                    "max_tokens", "500",
 //                    "messages", new Object[]{
 //                            Map.of("role", "system", "content", "You are a JSON formatting assistant."),
@@ -75,22 +74,13 @@ public class OpenAiServices {
             System.out.println("Response from Gemini API: " + response);
 
             if (response != null) {
-                // Get the "candidates" list
                 List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
-
                 if (candidates != null && !candidates.isEmpty()) {
-                    // Extract the content from the first candidate
                     Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
-
                     if (content != null) {
-                        // Extract the parts array from content
                         List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
-
                         if (parts != null && !parts.isEmpty()) {
-                            // Get the text from the first part
                             String structuredData = (String) parts.get(0).get("text");
-
-                            // Update request with structured data
                             request.setStructuredData(structuredData);
                             request.setStatus(Requests.Status.Completed);
                         } else {
@@ -109,7 +99,6 @@ public class OpenAiServices {
                 request.setStatus(Requests.Status.Failed);
                 request.setErrorMessage("Invalid response from Gemini.");
             }
-
         } catch (WebClientException e) {
             request.setStatus(Requests.Status.Failed);
             request.setErrorMessage("Gemini API Error: " + e.getMessage());
@@ -117,12 +106,9 @@ public class OpenAiServices {
             request.setStatus(Requests.Status.Failed);
             request.setErrorMessage("Unexpected Error: " + e.getMessage());
         }
-
         // Update the request in DB
         request.setUpdatedAt(Instant.now());
         requestRepo.save(request);
-
         return request;
     }
-
 }
