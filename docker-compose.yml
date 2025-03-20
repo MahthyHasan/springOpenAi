@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  backend:
+    build: .  # Path to Spring Boot Dockerfile
+    container_name: springboot_app
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    restart: unless-stopped
+    networks:
+      - springboot_network
+
+  frontend:
+    build: ./Frontend/hasan  # Path to Angular Dockerfile
+    container_name: angular_app
+    ports:
+      - "4200:80"  # Serve Angular via Nginx on port 80
+    depends_on:
+      - backend
+    networks:
+      - springboot_network
+
+networks:
+  springboot_network:
+    driver: bridge
