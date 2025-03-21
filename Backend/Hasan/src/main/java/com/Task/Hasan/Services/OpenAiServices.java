@@ -46,8 +46,10 @@ public class OpenAiServices {
             request.setStatus(Requests.Status.Processing);
             request.setUpdatedAt(Instant.now());
             requestRepo.save(request);
-            // Construct OpenAI API request
-            String concatenatedText = "Instruction start here (Given an unstructured sentence, extract key information and represent it in a concise JSON format. Focus on identifying entities, actions, and relationships, and only include relevant fields in the output. Omit any null or default values. Prioritize accuracy and clarity in the extracted data.)Instruction End Here: Unstructure sentence start here ( " + request.getUnStructuredData()+")Unstructure sentence end here";
+            // Construct OpenAI API 
+
+
+            String concatenatedText = "Instruction start here (Given an unstructured sentence, extract key information and represent it in a concise JSON format. Focus on identifying entities, actions, and relationships, and only include relevant fields in the output. Omit any null or default values. Prioritize accuracy and clarity in the extracted data.)Instruction End Here: Unstructure sentence start here ("+request.getUnStructuredData()+" )Unstructure sentence end here";
             Map<String, Object> requestBody = Map.of(
 ////                    "model", "claude-3-7-sonnet-20250219",  //  GPT-3.5-turbo
 ////                    "max_tokens", "500",
