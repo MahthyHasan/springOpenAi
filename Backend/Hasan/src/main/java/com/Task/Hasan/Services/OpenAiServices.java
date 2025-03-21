@@ -9,6 +9,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +37,7 @@ public class OpenAiServices {
 //                .baseUrl("https://api.anthropic.com/v1/messages")
 //                .defaultHeader("x-api-key", cloudeApiKey)
 //                .defaultHeader("anthropic-version", "2023-06-01")
-                .baseUrl("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyAW2RJ9jreYV4CThrS57nERwHz8ZhPAHdM")
+                .baseUrl("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyB3JMk4gm50b6J-IahD5SCoFsO-zK8ewxg")
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }
@@ -49,7 +51,9 @@ public class OpenAiServices {
             // Construct OpenAI API 
 
 
-            String concatenatedText = "Instruction start here (Given an unstructured sentence, extract key information and represent it in a concise JSON format. Focus on identifying entities, actions, and relationships, and only include relevant fields in the output. Omit any null or default values. Prioritize accuracy and clarity in the extracted data.)Instruction End Here: Unstructure sentence start here ("+request.getUnStructuredData()+" )Unstructure sentence end here";
+            String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            String concatenatedText = "Instruction start here: Given an unstructured sentence, generate a concise JSON response containing exactly two fields: 'request' and 'answer'. The 'request' field must exactly match the user's original input without any modifications or additional formatting like parentheses, quotes, or brackets. The 'answer' field must explicitly resolve any relative expressions (such as dates or times) based strictly on today's date (" + today + "). Do not include explanations or additional text. Omit any null or default values. Instruction end here. Unstructured sentence start here: (" + request.getUnStructuredData() + ") Unstructured sentence end here.";
             Map<String, Object> requestBody = Map.of(
 ////                    "model", "claude-3-7-sonnet-20250219",  //  GPT-3.5-turbo
 ////                    "max_tokens", "500",
