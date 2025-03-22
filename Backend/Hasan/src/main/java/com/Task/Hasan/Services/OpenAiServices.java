@@ -44,77 +44,91 @@ public class OpenAiServices {
 
     public Requests processRequest(Requests request) {
         try {
-            // Update status to PROCESSING
             request.setStatus(Requests.Status.Processing);
             request.setUpdatedAt(Instant.now());
             requestRepo.save(request);
-            // Construct OpenAI API 
 
-
-            String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-            String concatenatedText = "Instruction start here: Given an unstructured sentence, generate a concise JSON response containing exactly two fields: 'request' and 'answer'. The 'request' field must exactly match the user's original input without any modifications or additional formatting like parentheses, quotes, or brackets. The 'answer' field must explicitly resolve any relative expressions (such as dates or times) based strictly on today's date (" + today + "). Do not include explanations or additional text. Omit any null or default values. Instruction end here. Unstructured sentence start here: (" + request.getUnStructuredData() + ") Unstructured sentence end here.";
-            Map<String, Object> requestBody = Map.of(
-////                    "model", "claude-3-7-sonnet-20250219",  //  GPT-3.5-turbo
-////                    "max_tokens", "500",
-//                    "messages", new Object[]{
-//                            Map.of("role", "system", "content", "You are a JSON formatting assistant."),
-//                            Map.of("role", "user", "content", request.getUnStructuredData())
-//                    }
-                    "contents", new Object[] {
-                            Map.of(
-                                    "parts", new Object[] {
-                                            Map.of("text", concatenatedText)
-                                    }
-                            )
-                    }
+            // Step 1: Intent Clarification
+            String clarificationPrompt = PromptTemplates.getIntentClarificationPrompt(request.getUnStructuredData());
+            Map<String, Object> clarificationBody = Map.of(
+                    "contents", new Object[]{ Map.of("parts", new Object[]{Map.of("text", clarificationPrompt)}) }
             );
 
-            // Call OpenAI API and wait for response
-            Map<String, Object> response = webClient.post()
-                    .bodyValue(requestBody)
+            Map<String, Object> clarificationResponse = webClient.post()
+                    .bodyValue(clarificationBody)
                     .retrieve()
                     .bodyToMono(Map.class)
-                    .block();  // Waits for response
-            // Log the response to see its structure
-            System.out.println("Response from Gemini API: " + response);
+                    .block();
 
-            if (response != null) {
-                List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
-                if (candidates != null && !candidates.isEmpty()) {
-                    Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
-                    if (content != null) {
-                        List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
-                        if (parts != null && !parts.isEmpty()) {
-                            String structuredData = (String) parts.get(0).get("text");
-                            request.setStructuredData(structuredData);
-                            request.setStatus(Requests.Status.Completed);
-                        } else {
-                            request.setStatus(Requests.Status.Failed);
-                            request.setErrorMessage("No parts found in content.");
-                        }
-                    } else {
-                        request.setStatus(Requests.Status.Failed);
-                        request.setErrorMessage("No content found in the first candidate.");
-                    }
-                } else {
-                    request.setStatus(Requests.Status.Failed);
-                    request.setErrorMessage("No candidates found in the response.");
-                }
-            } else {
-                request.setStatus(Requests.Status.Failed);
-                request.setErrorMessage("Invalid response from Gemini.");
+            String clarifiedQuestion = extractGeminiResponse(clarificationResponse);
+
+            if (clarifiedQuestion == null || clarifiedQuestion.isEmpty()) {
+                throw new RuntimeException("Clarification response is empty");
             }
+            request.setClarifiedIntent(clarifiedQuestion);
+            requestRepo.save(request);
+
+
+            try {
+                Thread.sleep(3000);  // 3 seconds
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.err.println("Thread interrupted during sleep: " + e.getMessage());
+            }
+
+            // Step 2: Structured Prompt Generation
+            String finalPrompt = PromptTemplates.getFinalStructuredPrompt(request.getUnStructuredData(), clarifiedQuestion);
+            Map<String, Object> finalRequestBody = Map.of(
+                    "contents", new Object[]{ Map.of("parts", new Object[]{Map.of("text", finalPrompt)}) }
+            );
+
+            Map<String, Object> finalResponse = webClient.post()
+                    .bodyValue(finalRequestBody)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+
+            String structuredData = extractGeminiResponse(finalResponse);
+
+            if (structuredData == null || structuredData.isEmpty()) {
+                throw new RuntimeException("Final structured response is empty");
+            }
+
+            request.setStructuredData(structuredData);
+            request.setStatus(Requests.Status.Completed);
+
         } catch (WebClientException e) {
             request.setStatus(Requests.Status.Failed);
             request.setErrorMessage("Gemini API Error: " + e.getMessage());
+            System.err.println("Gemini API Exception: " + e.getMessage());
         } catch (Exception e) {
             request.setStatus(Requests.Status.Failed);
             request.setErrorMessage("Unexpected Error: " + e.getMessage());
+            System.err.println("Unexpected Exception: " + e.getMessage());
         }
-        // Update the request in DB
+
         request.setUpdatedAt(Instant.now());
         requestRepo.save(request);
         return request;
+    }
+
+    private String extractGeminiResponse(Map<String, Object> response) {
+        try {
+            List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
+            if (candidates != null && !candidates.isEmpty()) {
+                Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
+                if (content != null) {
+                    List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
+                    if (parts != null && !parts.isEmpty()) {
+                        String result = (String) parts.get(0).get("text");
+                        System.out.println("Gemini response extracted: " + result);
+                        return result;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error extracting response: " + e.getMessage());
+        }
+        return null;
     }
 }

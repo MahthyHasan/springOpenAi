@@ -13,6 +13,7 @@ public class Requests {
     @Id
     private String id;
     private String unStructuredData;
+    private String clarifiedIntent; // NEW FIELD
     private String structuredData;
     private Status status = Status.Pending;
     private String errorMessage;
@@ -28,14 +29,16 @@ public class Requests {
         Failed
     }
 
-    public Requests(String id, String unStructuredData, String structuredData, Status status, String errorMessage, Instant createdAt, Instant updatedAt) {
+    public Requests(String id, String unStructuredData, String clarifiedIntent, String structuredData, Status status, String errorMessage, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.unStructuredData = unStructuredData;
+        this.clarifiedIntent = clarifiedIntent;
         this.structuredData = structuredData;
         this.status = status;
         this.errorMessage = errorMessage;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+
     }
 
     public Requests() {
@@ -55,6 +58,14 @@ public class Requests {
 
     public void setUnStructuredData(String unStructuredData) {
         this.unStructuredData = unStructuredData;
+    }
+
+    public String getClarifiedIntent() {
+        return clarifiedIntent;
+    }
+
+    public void setClarifiedIntent(String clarifiedIntent) {
+        this.clarifiedIntent = clarifiedIntent;
     }
 
     public String getStructuredData() {
@@ -102,6 +113,7 @@ public class Requests {
         return "Requests{" +
                 "id='" + id + '\'' +
                 ", unStructuredData='" + unStructuredData + '\'' +
+                ", clarifiedIntent='" + clarifiedIntent + '\'' +
                 ", structuredData='" + structuredData + '\'' +
                 ", status=" + status +
                 ", errorMessage='" + errorMessage + '\'' +
